@@ -6,7 +6,7 @@
 
 unsigned
 HT_GetHash(const char *data) {
-	unsigned long hash = OFFSET;
+	unsigned hash = OFFSET;
 	char *d = (char *)data;
 
 	if (!d || !*d) return 0;
