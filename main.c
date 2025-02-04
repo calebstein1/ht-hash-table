@@ -76,20 +76,21 @@ HT_SetValuePtr(const char *key, void *val, size_t nbytes, HT_HashTable *t, size_
 int
 main(void) {
 	HT_HashTable t[16];
+	char *test_string = "Hello, world!";
 
 	HT_ZeroTable(t);
 	HT_SetValue("Value 1", int, 16, t);
 	HT_SetValue("Value 2", int, 12, t);
 	HT_SetValue("Value 3", int, 243, t);
 	HT_SetValue("Value 4", int, 19, t);
-	HT_SetValue("Value 5", int, 8, t);
+	HT_SetValue("Value 5", char *, test_string, t);
 	HT_SetValue("Value 6", int, 55682, t);
 
 	HT_GetValue("Value 2", int, t) += 8;
 
-	printf("%d, %d, %d, %d, %d, %d\n",
+	printf("%d, %s, %d, %d, %d, %d\n",
 		HT_GetValue("Value 6", int, t),
-		HT_GetValue("Value 5", int, t),
+		HT_GetValue("Value 5", char *, t),
 		HT_GetValue("Value 4", int, t),
 		HT_GetValue("Value 3", int, t),
 		HT_GetValue("Value 2", int, t),
