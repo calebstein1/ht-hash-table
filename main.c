@@ -11,6 +11,7 @@
 typedef struct {
     uintptr_t d;
     unsigned h;
+    uint64_t b;
 } HT_HashTable;
 
 unsigned
@@ -51,8 +52,10 @@ void *
 HT_GetValuePtr(const char *key, const HT_HashTable *t, size_t len) {
 	unsigned hash = HT_GetHash(key);
 	int i = (int)(hash % len);
+	size_t k_len = strlen(key);
 
-	if (t[i].h == hash) return (void *)&t[i].d;
+	if (t[i].h == hash && memcmp(&t[i].b, key, k_len > sizeof(uint64_t) ? sizeof(uint64_t) : k_len) == 0)
+		return (void *)&t[i].d;
 
 	i = HT_ProbeForBucket(t, hash, i, len);
 
@@ -63,14 +66,17 @@ unsigned
 HT_SetValuePtr(const char *key, uintptr_t val, size_t nbytes, HT_HashTable *t, size_t len) {
 	unsigned hash = HT_GetHash(key);
 	int i = (int)(hash % len);
+	size_t k_len = strlen(key);
 
 	if (nbytes > sizeof(uintptr_t)) return -1;
 
-	if (t[i].h && t[i].h != hash) i = HT_ProbeForFreeBucket(t, i, len);
+	if (t[i].h && t[i].h != hash && memcmp(&t[i].b, key, k_len > sizeof(uint64_t) ? sizeof(uint64_t) : k_len) != 0)
+		i = HT_ProbeForFreeBucket(t, i, len);
 	if (i == -1) return 0;
 
 	t[i].h = hash;
 	t[i].d = val;
+	memcpy(&t[i].b, key, k_len > sizeof(uint64_t) ? sizeof(uint64_t) : k_len);
 
 	return hash;
 }
