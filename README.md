@@ -18,8 +18,8 @@ HT_ZeroTable(my_table); /* Table needs to be zeroed before use */
 
 HT_SetValue("My Key", int, 54, my_table); /* Sets a value of a specified non-floating point type to the key's bucket */
 if (HT_CheckKeyExists("My Key", my_table)) { /* True if a value is associated with the supplied key, false if not */
-        n = HT_GetValue("My_Key", int, my_table); /* Gets the value of a specified type associated with the key */
-        n_p = HT_GetRef("My_Key", my_table); /* Gets a pointer to the value associated with the key */
+        n = HT_GetValue("My Key", int, my_table); /* Gets the value of a specified type associated with the key */
+        n_p = HT_GetRef("My Key", my_table); /* Gets a pointer to the value associated with the key */
 }
 ```
 
