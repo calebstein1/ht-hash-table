@@ -4,12 +4,6 @@
 #define OFFSET 0x811c9dc5
 #define PRIME 0x01000193
 
-struct ht_hashtable_t {
-    void *d;
-    unsigned h;
-    unsigned b;
-};
-
 unsigned
 HT_GetHash(const char *data) {
 	unsigned long hash = OFFSET;

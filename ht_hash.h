@@ -7,7 +7,11 @@
 #define HT_GetValue(k, type, t) *(type *)HT_GetValuePtr((k), (t), (sizeof((t)) / sizeof(*(t))))
 #define HT_SetValue(k, type, v, t) HT_SetValuePtr((k), (void *)(v), sizeof(type), (t), (sizeof((t)) / sizeof(*(t))))
 
-typedef struct ht_hashtable_t HT_HashTable;
+typedef struct {
+    void *d;
+    unsigned h;
+    unsigned b;
+} HT_HashTable;
 
 void *HT_GetValuePtr(const char *key, const HT_HashTable *t, int len);
 unsigned HT_SetValuePtr(const char *key, void *val, size_t nbytes, HT_HashTable *t, int len);
