@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -5,10 +6,10 @@
 
 #define HT_ZeroTable(t) memset((t), 0, sizeof((t)))
 #define HT_GetValue(k, type, t) *(type *)HT_GetValuePtr((k), (t), (sizeof((t)) / sizeof(*(t))))
-#define HT_SetValue(k, type, v, t) HT_SetValuePtr((k), (void *)(v), sizeof(type), (t), (sizeof((t)) / sizeof(*(t))))
+#define HT_SetValue(k, type, v, t) HT_SetValuePtr((k), (uintptr_t)(v), sizeof(type), (t), (sizeof((t)) / sizeof(*(t))))
 
 typedef struct {
-    void *d;
+    uintptr_t d;
     unsigned h;
 } HT_HashTable;
 
@@ -22,8 +23,8 @@ HT_GetHash(const char *data) {
 	return crc ^ 0xffffffff;
 }
 
-unsigned
-HT_ProbeForBucket(const HT_HashTable *t, unsigned hash, unsigned i, size_t len) {
+int
+HT_ProbeForBucket(const HT_HashTable *t, unsigned hash, int i, size_t len) {
 	unsigned s = i ? i - 1 : len - 1;
 
 	while (t[i].h != hash) {
@@ -34,7 +35,8 @@ HT_ProbeForBucket(const HT_HashTable *t, unsigned hash, unsigned i, size_t len) 
 	return i;
 }
 
-unsigned HT_ProbeForFreeBucket(const HT_HashTable *t, unsigned i, size_t len) {
+int
+HT_ProbeForFreeBucket(const HT_HashTable *t, int i, size_t len) {
 	unsigned s = i ? i - 1 : len - 1;
 
 	while (t[i].h) {
@@ -48,24 +50,24 @@ unsigned HT_ProbeForFreeBucket(const HT_HashTable *t, unsigned i, size_t len) {
 void *
 HT_GetValuePtr(const char *key, const HT_HashTable *t, size_t len) {
 	unsigned hash = HT_GetHash(key);
-	unsigned i = (int)(hash % len);
+	int i = (int)(hash % len);
 
 	if (t[i].h == hash) return (void *)&t[i].d;
 
 	i = HT_ProbeForBucket(t, hash, i, len);
 
-	return (signed)i == -1 ? NULL : (void *)&t[i].d;
+	return i == -1 ? NULL : (void *)&t[i].d;
 }
 
 unsigned
-HT_SetValuePtr(const char *key, void *val, size_t nbytes, HT_HashTable *t, size_t len) {
+HT_SetValuePtr(const char *key, uintptr_t val, size_t nbytes, HT_HashTable *t, size_t len) {
 	unsigned hash = HT_GetHash(key);
-	unsigned i = hash % len;
+	int i = (int)(hash % len);
 
-	if (nbytes > sizeof(void *)) return -1;
+	if (nbytes > sizeof(uintptr_t)) return -1;
 
 	if (t[i].h && t[i].h != hash) i = HT_ProbeForFreeBucket(t, i, len);
-	if ((signed)i == -1) return i;
+	if (i == -1) return 0;
 
 	t[i].h = hash;
 	t[i].d = val;
