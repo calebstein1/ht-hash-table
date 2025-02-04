@@ -37,10 +37,10 @@ HT_ProbeForBucket(const HT_HashTable *t, unsigned hash, int i, size_t len) {
 }
 
 int
-HT_ProbeForFreeBucket(const HT_HashTable *t, int i, size_t len) {
+HT_ProbeForFreeBucket(const HT_HashTable *t, unsigned hash, int i, size_t len) {
 	unsigned s = i ? i - 1 : len - 1;
 
-	while (t[i].h) {
+	while (t[i].h && t[i].h != hash) {
 		if (++i == len) i = 0;
 		if (i == s) return -1;
 	}
@@ -71,7 +71,7 @@ HT_SetValuePtr(const char *key, uintptr_t val, size_t nbytes, HT_HashTable *t, s
 	if (nbytes > sizeof(uintptr_t)) return -1;
 
 	if (t[i].h && (t[i].h != hash || memcmp(&t[i].b, key, k_len > sizeof(uint32_t) ? sizeof(uint32_t) : k_len) != 0))
-		i = HT_ProbeForFreeBucket(t, i, len);
+		i = HT_ProbeForFreeBucket(t, hash, i, len);
 	if (i == -1) return 0;
 
 	t[i].h = hash;
