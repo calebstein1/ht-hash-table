@@ -11,7 +11,7 @@ HT Hash operates on HT_HashTable pointers.
 
 HT_HashTable *my_table;
 
-HT_InitTable(&my_table); /* Table needs to be zeroed before use */
+HT_InitTable(&my_table);
 
 HT_SetValue("My Key", 12, my_table);
 printf("%d\n", HT_GetValue("My Key", my_table));
