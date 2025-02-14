@@ -3,10 +3,9 @@
 #define OFFSET 0x811c9dc5
 #define PRIME 0x01000193
 #define INIT_TBL_SIZE 8
-#define MAX_KEY_LEN 32
 
 struct hash_entry_t {
-	uintptr_t d;
+	intptr_t d;
 	unsigned h, u;
 	char k[MAX_KEY_LEN];
 };
@@ -16,24 +15,28 @@ struct hash_table_t {
 	struct hash_entry_t *d;
 };
 
-struct hash_table_t *HT_InitTable(struct hash_table_t **tbl) {
-	if (*tbl) return *tbl;
-	if (!(*tbl = malloc(sizeof(struct hash_table_t)))) return NULL;
-	if (!((*tbl)->d = calloc(INIT_TBL_SIZE, sizeof(struct hash_entry_t)))) {
-		free(*tbl);
+HT_HashTable
+HT_NewTable(void) {
+	HT_HashTable tbl;
+
+	if (!(tbl = malloc(sizeof(struct hash_table_t)))) return NULL;
+	if (!((tbl)->d = calloc(INIT_TBL_SIZE, sizeof(struct hash_entry_t)))) {
+		free(tbl);
 		return NULL;
 	}
-	(*tbl)->c = 0;
-	(*tbl)->s = INIT_TBL_SIZE;
+	tbl->c = 0;
+	tbl->s = INIT_TBL_SIZE;
 
-	return *tbl;
+	return tbl;
 }
 
-struct hash_table_t *HT_IncreaseSizeRehash(struct hash_table_t *tbl) {
+struct
+hash_table_t *HT_IncreaseSizeRehash(struct hash_table_t *tbl) {
 	struct hash_entry_t *ntbl = NULL, *otbl;
 	int i;
 
 	if (!(ntbl = calloc(tbl->s << 1, sizeof(struct hash_entry_t)))) return NULL;
+	tbl->c = 0;
 	otbl = tbl->d, tbl->d = ntbl;
 	for (i = 0, tbl->s <<= 1; i < tbl->s >> 1; i++) if (otbl[i].u) HT_SetValue(otbl[i].k, otbl[i].d, tbl);
 	free(otbl);
@@ -41,7 +44,8 @@ struct hash_table_t *HT_IncreaseSizeRehash(struct hash_table_t *tbl) {
 	return tbl;
 }
 
-unsigned HT_GetHash(const char *data) {
+unsigned
+HT_GetHash(const char *data) {
 	unsigned hash = OFFSET;
 	char *d = (char *)data;
 
@@ -53,7 +57,8 @@ unsigned HT_GetHash(const char *data) {
 	return hash;
 }
 
-int HT_ProbeForBucket(const struct hash_table_t *t, unsigned hash, int i, int set) {
+int
+HT_ProbeForBucket(const struct hash_table_t *t, unsigned hash, int i, int set) {
 	int len = t->s, s = i ? i - 1 : len;
 
 	while (t->d[i].h != hash) {
@@ -64,7 +69,8 @@ int HT_ProbeForBucket(const struct hash_table_t *t, unsigned hash, int i, int se
 	return i;
 }
 
-uintptr_t HT_GetValue(const char *key, const struct hash_table_t *t) {
+intptr_t
+HT_GetValue(const char *key, HT_HashTable t) {
 	unsigned hash = HT_GetHash(key);
 	int i = (int)(hash & (t->s - 1));
 
@@ -73,7 +79,8 @@ uintptr_t HT_GetValue(const char *key, const struct hash_table_t *t) {
 	return i == -1 ? 0 : t->d[i].d;
 }
 
-unsigned HT_SetValue(const char *key, uintptr_t val, struct hash_table_t *t) {
+unsigned
+HT_SetValue(const char *key, intptr_t val, HT_HashTable t) {
 	unsigned hash = HT_GetHash(key);
 	int i;
 
@@ -86,9 +93,18 @@ unsigned HT_SetValue(const char *key, uintptr_t val, struct hash_table_t *t) {
 	return hash;
 }
 
-void HT_FreeTable(struct hash_table_t **tbl) {
-	if (!tbl) return;
-	free((*tbl)->d);
-	free(*tbl);
-	*tbl = NULL;
+void
+HT_DeleteKey(const char *key, HT_HashTable t) {
+	unsigned hash = HT_GetHash(key);
+	int i = (int)(hash & (t->s - 1));
+
+	if (t->d[i].h == hash && strcmp(t->d[i].k, key) == 0) memset(&t->d[i].d, 0, sizeof(struct hash_entry_t));
+	if ((i = HT_ProbeForBucket(t, hash, i, 0)) == -1) return;
+	memset(&t->d[i].d, 0, sizeof(struct hash_entry_t));
+}
+
+void
+HT_FreeTable(HT_HashTable tbl) {
+	free(tbl->d);
+	free(tbl);
 }
