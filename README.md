@@ -12,7 +12,7 @@ HT Hash operates on HT_HashTable objects.
 HT_HashTable my_table = HT_NewTable();
 
 HT_SetValue("My Key", 12, my_table);
-printf("%d\n", HT_GetValue("My Key", my_table));
+printf("%ld\n", HT_GetValue("My Key", my_table));
 HT_DeleteKey("My Key", my_table);
 
 HT_FreeTable(my_table);
