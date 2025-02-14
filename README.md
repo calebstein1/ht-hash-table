@@ -1,6 +1,6 @@
 # HT Hash Table
 
-This is a tiny open-addressed hash table in about 100 SLOC.
+This is a tiny open-addressed hash table in about 150 SLOC.
 
 ## Usage
 

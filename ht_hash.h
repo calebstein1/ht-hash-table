@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 #define MAX_KEY_LEN 32
@@ -12,6 +13,7 @@
 
 typedef struct hash_table_t * HT_HashTable;
 
+const char *HT_GetError(void);
 HT_HashTable HT_NewTable(void);
 intptr_t HT_GetValue(const char *key, HT_HashTable t);
 unsigned HT_SetValue(const char *key, intptr_t val, HT_HashTable t);
