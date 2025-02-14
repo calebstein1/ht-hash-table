@@ -140,7 +140,7 @@ HT_DeleteKey(const char *key, HT_HashTable t) {
 
 	if (t->d[i].h != hash || strcmp(t->d[i].k, key) != 0)
 		i = HT_ProbeForBucket(t, hash, i, 0);
-	if (t->d[i].h != hash) {
+	if (t->d[i].s != HT_USED || t->d[i].h != hash) {
 		HT_SetError("Key %s does not exist in table", key);
 		return;
 	}
