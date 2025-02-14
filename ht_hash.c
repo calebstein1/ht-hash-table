@@ -65,14 +65,14 @@ HT_GetHash(const char *data) {
 
 int
 HT_ProbeForBucket(const struct hash_table_t *t, unsigned hash, int i, int set) {
-	int len = t->s, s = i ? i - 1 : len, p = 0;
+	int len = t->s, s = i ? i - 1 : len, p = -1;
 
 	while (t->d[i].s && t->d[i].h != hash) {
-		if (set && t->d[i].s == HT_DELETED) p = i;
+		if (set && t->d[i].s == HT_DELETED && p == -1) p = i;
 		if (i == s) return -1;
 		if (++i == len) i = 0;
 	}
-	return set && !t->d[i].s ? p : i;
+	return set && t->d[i].h != hash && p > -1 ? p : i;
 }
 
 intptr_t
