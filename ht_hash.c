@@ -37,8 +37,8 @@ HT_NewTable(void) {
 	return tbl;
 }
 
-struct
-hash_table_t *HT_IncreaseSizeRehash(struct hash_table_t *tbl) {
+struct hash_table_t *
+HT_IncreaseSizeRehash(struct hash_table_t *tbl) {
 	struct hash_entry_t *ntbl = NULL, *otbl;
 	int i;
 
