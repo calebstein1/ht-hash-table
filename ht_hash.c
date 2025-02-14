@@ -98,9 +98,10 @@ HT_DeleteKey(const char *key, HT_HashTable t) {
 	unsigned hash = HT_GetHash(key);
 	int i = (int)(hash & (t->s - 1));
 
-	if (t->d[i].h == hash && strcmp(t->d[i].k, key) == 0) memset(&t->d[i].d, 0, sizeof(struct hash_entry_t));
-	if ((i = HT_ProbeForBucket(t, hash, i, 0)) == -1) return;
-	memset(&t->d[i].d, 0, sizeof(struct hash_entry_t));
+	if (t->d[i].h != hash || strcmp(t->d[i].k, key) != 0)
+		if ((i = HT_ProbeForBucket(t, hash, i, 0)) == -1) return;
+	memset(&t->d[i], 0, sizeof(struct hash_entry_t));
+	t->c--;
 }
 
 void
