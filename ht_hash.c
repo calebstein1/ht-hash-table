@@ -5,8 +5,7 @@
 #define INIT_TBL_SIZE 8
 
 enum hash_status_e {
-	HT_FREE,
-	HT_USED,
+	HT_USED = 1,
 	HT_DELETED
 };
 
@@ -66,14 +65,14 @@ HT_GetHash(const char *data) {
 
 int
 HT_ProbeForBucket(const struct hash_table_t *t, unsigned hash, int i, int set) {
-	int len = t->s, s = i ? i - 1 : len;
+	int len = t->s, s = i ? i - 1 : len, p = 0;
 
-	while (t->d[i].h != hash) {
-		if (set && (!t->d[i].s || t->d[i].s == HT_DELETED)) break;
+	while (t->d[i].s && t->d[i].h != hash) {
+		if (set && t->d[i].s == HT_DELETED) p = i;
 		if (i == s) return -1;
 		if (++i == len) i = 0;
 	}
-	return i;
+	return set && !t->d[i].s ? p : i;
 }
 
 intptr_t
@@ -95,7 +94,8 @@ HT_SetValue(const char *key, intptr_t val, HT_HashTable t) {
 	i = (int)(hash & (t->s - 1));
 	if (t->d[i].h && (t->d[i].h != hash || strcmp(t->d[i].k, key) != 0)) i = HT_ProbeForBucket(t, hash, i, 1);
 	if (i == -1) return 0;
-	t->d[i].d = val, t->d[i].h = hash, t->d[i].s = HT_USED, t->c++;
+	if (t->d[i].s != HT_USED) t->c++;
+	t->d[i].d = val, t->d[i].h = hash, t->d[i].s = HT_USED;
 	strlcpy(t->d[i].k, key, MAX_KEY_LEN - 1);
 	return hash;
 }
