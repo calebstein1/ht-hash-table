@@ -1,19 +1,18 @@
 #ifndef HASH_TABLE_HT_HASH_H
 #define HASH_TABLE_HT_HASH_H
 
-#define HT_ZeroTable(t) memset((t), 0, sizeof((t)))
-#define HT_CheckKeyExists(k, t) (HT_GetValuePtr((k), (t), (sizeof((t)) / sizeof(*(t)))) != NULL)
-#define HT_GetRef(k, t) HT_GetValuePtr((k), (t), (sizeof((t)) / sizeof(*(t))))
-#define HT_GetValue(k, type, t) *(type *)HT_GetValuePtr((k), (t), (sizeof((t)) / sizeof(*(t))))
-#define HT_SetValue(k, type, v, t) HT_SetValuePtr((k), (void *)(v), sizeof(type), (t), (sizeof((t)) / sizeof(*(t))))
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
 
-typedef struct {
-    void *d;
-    unsigned h;
-    unsigned b;
-} HT_HashTable;
+#define HT_StoreRef(key, val, tbl) (HT_SetValue((key), (uintptr_t)(val), (tbl)))
+#define HT_GetRef(key, type, tbl) ((type *)HT_GetValue((key), (tbl)))
 
-void *HT_GetValuePtr(const char *key, const HT_HashTable *t, int len);
-unsigned HT_SetValuePtr(const char *key, void *val, size_t nbytes, HT_HashTable *t, int len);
+typedef struct hash_table_t HT_HashTable;
+
+HT_HashTable *HT_InitTable(struct hash_table_t **tbl);
+uintptr_t HT_GetValue(const char *key, const HT_HashTable *t);
+unsigned HT_SetValue(const char *key, uintptr_t val, HT_HashTable *t);
+void HT_FreeTable(struct hash_table_t **tbl);
 
 #endif /* HASH_TABLE_HT_HASH_H */
