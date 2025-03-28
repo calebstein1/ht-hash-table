@@ -1,6 +1,6 @@
 # HT Hash Table
 
-This is a tiny open-addressed hash table in about 150 SLOC.
+This is a tiny open-addressed hash table in about 200 SLOC.
 
 ## Usage
 
@@ -24,4 +24,4 @@ You can also use the `HT_StoreRef` and `HT_GetRef` macros to store and get point
 
 Just drop `ht_hash.c` into your projects sources and include `ht_hash.h` and you're good to go!
 HT Hash is written in C99 with no extensions so it should work almost everywhere.
-Specifically, it depends on `stdlib.h`, `stdint.h`, and `string.h`.
+Specifically, it depends on `errno.h`, `stdarg.h`, `stdlib.h`, `stdint.h`, `stdio.h`, and `string.h`.
