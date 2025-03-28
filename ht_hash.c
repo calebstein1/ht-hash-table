@@ -9,8 +9,9 @@
 #define MSG_LEN 256
 
 enum hash_status_e {
-	HT_USED = 1,
-	HT_DELETED
+	HT_DELETED = -1,
+	HT_FREE,
+	HT_USED
 };
 
 struct hash_entry_t {
@@ -44,11 +45,11 @@ HT_HashTable
 HT_NewTable(void) {
 	HT_HashTable tbl;
 
-	if (!(tbl = malloc(sizeof(struct hash_table_t)))) {
+	if (!((tbl = malloc(sizeof(struct hash_table_t))))) {
 		HT_SetError("Could not allocate table: %s", strerror(errno));
 		return NULL;
 	}
-	if (!((tbl)->table_entries = calloc(INIT_TBL_SIZE, sizeof(struct hash_entry_t)))) {
+	if (!((tbl->table_entries = calloc(INIT_TBL_SIZE, sizeof(struct hash_entry_t))))) {
 		HT_SetError("Could not allocate table data: %s", strerror(errno));
 		free(tbl);
 		return NULL;
@@ -64,7 +65,7 @@ HT_IncreaseSizeRehash(struct hash_table_t *tbl) {
 	struct hash_entry_t *ntbl = NULL, *otbl;
 	int i;
 
-	if (!(ntbl = calloc(tbl->size << 1, sizeof(struct hash_entry_t)))) {
+	if (!((ntbl = calloc(tbl->size << 1, sizeof(struct hash_entry_t))))) {
 		HT_SetError("Failed to grow table: %s", strerror(errno));
 		return NULL;
 	}
@@ -132,7 +133,39 @@ HT_SetValue(const char *key, intptr_t val, HT_HashTable t) {
 	if (t->table_entries[i].status != HT_USED) t->count++;
 	t->table_entries[i].data = val, t->table_entries[i].hash = hash, t->table_entries[i].status = HT_USED;
 	strlcpy(t->table_entries[i].key, key, MAX_KEY_LEN - 1);
-	return hash;
+	return i;
+}
+
+int
+HT_GetStatus(const char *key, HT_HashTable t) {
+	unsigned hash = HT_GetHash(key);
+	int i = (int)(hash & (t->size - 1));
+
+	if (!key) return 0;
+
+	return t->table_entries[i].status;
+}
+
+unsigned
+HT_SetStatus(const char *key, int val, HT_HashTable t) {
+	unsigned hash = HT_GetHash(key);
+	int i = (int)(hash & (t->size - 1));
+
+	if (!key || !t->table_entries[i].status) return 0;
+
+	t->table_entries[i].status = val;
+
+	return i;
+}
+
+unsigned
+HT_GetCount(HT_HashTable t) {
+	return t->count;
+}
+
+unsigned
+HT_GetSize(HT_HashTable t) {
+	return t->size;
 }
 
 void
